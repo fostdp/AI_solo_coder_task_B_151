@@ -17,11 +17,18 @@ CREATE TABLE IF NOT EXISTS waterwheel_device (
     device_id SERIAL PRIMARY KEY,
     device_name VARCHAR(100) NOT NULL,
     location VARCHAR(200),
+    location_code VARCHAR(50),
     chain_length DECIMAL(10, 2),
+    chain_length_cm DECIMAL(10, 2),
+    nominal_sprocket_speed_rpm DECIMAL(10, 2),
     num_links INTEGER,
     sprocket_radius DECIMAL(10, 2),
+    sprocket_radius_cm DECIMAL(10, 2),
     scraper_count INTEGER,
     scraper_shape VARCHAR(50),
+    chain_type_code VARCHAR(20) DEFAULT 'plate',
+    era_code VARCHAR(30) DEFAULT 'ancient_song',
+    parallel_group_id INTEGER DEFAULT 1,
     installation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'ACTIVE'
 );
@@ -150,11 +157,32 @@ CREATE TABLE IF NOT EXISTS chain_link_params (
 -- ============================================
 
 -- 插入示例翻车设备
-INSERT INTO waterwheel_device (device_name, location, chain_length, num_links, sprocket_radius, scraper_count, scraper_shape, status)
-VALUES 
-    ('宋代翻车一号', '河南开封考古现场', 15.5, 120, 0.35, 24, '弧形刮板', 'ACTIVE'),
-    ('宋代翻车二号', '浙江宁波水利遗址', 18.2, 140, 0.40, 28, '平板刮板', 'ACTIVE'),
-    ('宋代翻车三号', '江苏扬州博物馆', 12.8, 100, 0.30, 20, '梯形刮板', 'ACTIVE')
+INSERT INTO waterwheel_device (device_name, location, location_code,
+    chain_length, chain_length_cm, nominal_sprocket_speed_rpm,
+    num_links, sprocket_radius, sprocket_radius_cm,
+    scraper_count, scraper_shape,
+    chain_type_code, era_code, parallel_group_id, status)
+VALUES
+    ('宋代翻车一号', '河南开封考古现场', 'KAIFENG-001',
+        5.0, 500.0, 12.5,
+        120, 0.30, 30.0,
+        24, '弧形刮板',
+        'plate', 'ancient_song', 1, 'ACTIVE'),
+    ('宋代翻车二号', '浙江宁波水利遗址', 'NINGBO-002',
+        5.8, 580.0, 15.0,
+        140, 0.35, 35.0,
+        28, '平板刮板',
+        'round', 'ancient_song', 1, 'ACTIVE'),
+    ('宋代翻车三号', '江苏扬州博物馆', 'YANGZHOU-003',
+        4.2, 420.0, 10.0,
+        100, 0.25, 25.0,
+        20, '梯形刮板',
+        'hook', 'ancient_song', 1, 'ACTIVE'),
+    ('现代电动链式泵对照机', '上海工业试验站', 'MOD-REF-001',
+        6.5, 650.0, 22.0,
+        120, 0.35, 35.0,
+        24, '工程塑料衬板刮板',
+        'round', 'modern_electric', 2, 'ACTIVE')
 ON CONFLICT DO NOTHING;
 
 -- 插入设备配置参数
@@ -169,7 +197,11 @@ VALUES
     (2, 'water_flow_min_threshold', 600.0, 'L/h', '最低提水量阈值'),
     (3, 'tension_warning_threshold', 7500.0, 'N', '链条张力告警阈值'),
     (3, 'tension_critical_threshold', 10500.0, 'N', '链条张力临界阈值'),
-    (3, 'water_flow_min_threshold', 450.0, 'L/h', '最低提水量阈值')
+    (3, 'water_flow_min_threshold', 450.0, 'L/h', '最低提水量阈值'),
+    (4, 'tension_warning_threshold', 15000.0, 'N', '现代链式泵张力告警阈值'),
+    (4, 'tension_critical_threshold', 22000.0, 'N', '现代链式泵张力临界阈值'),
+    (4, 'water_flow_min_threshold', 2000.0, 'L/h', '现代链式泵最低提水量阈值'),
+    (4, 'vibration_warning_threshold', 4.0, 'mm', '现代链式泵振动告警阈值')
 ON CONFLICT DO NOTHING;
 
 -- 插入链节参数

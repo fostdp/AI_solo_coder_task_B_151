@@ -13,6 +13,7 @@ services:
       - timescale-data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./database/timescaledb_policies.sql:/docker-entrypoint-initdb.d/02-policies.sql
+      - ./database/upgrade_v2_features.sql:/docker-entrypoint-initdb.d/03-upgrade-v2.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-waterwheel_simulation}"]
       interval: 10s

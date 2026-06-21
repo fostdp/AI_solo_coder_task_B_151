@@ -27,6 +27,18 @@ public class WaterwheelController {
     @Autowired
     private com.waterwheel.chaintransmission.dtu_receiver.service.DtuReceiverService dtuReceiverService;
 
+    @Autowired
+    private com.waterwheel.chaintransmission.comparison.service.ChainTypeComparisonService chainTypeComparisonService;
+
+    @Autowired
+    private com.waterwheel.chaintransmission.comparison.service.EraComparisonService eraComparisonService;
+
+    @Autowired
+    private com.waterwheel.chaintransmission.optimization.ParallelCoordinationOptimizer parallelOptimizer;
+
+    @Autowired
+    private com.waterwheel.chaintransmission.virtualoperation.service.VirtualOperationService virtualOperationService;
+
     @GetMapping("/devices")
     public ResponseEntity<List<WaterwheelDevice>> getAllDevices() {
         return ResponseEntity.ok(waterwheelService.getAllDevices());
@@ -170,12 +182,97 @@ public class WaterwheelController {
         return ResponseEntity.ok(waterwheelService.saveChainLinkParams(params));
     }
 
+    // =============  新功能1: 链传动形式对比  =============
+
+    @PostMapping("/comparison/chain-types/{deviceId}")
+    public ResponseEntity<ChainTypeComparisonDTO> compareChainTypes(
+            @PathVariable Integer deviceId,
+            @RequestParam(required = false) Double inputSpeedRPM,
+            @RequestParam(required = false) Double inputTorque,
+            @RequestParam(required = false) Double scraperDepth,
+            @RequestParam(required = false) Double scraperWidth,
+            @RequestParam(required = false) Double scraperAngle) {
+        log.info("执行链传动形式对比: deviceId={}", deviceId);
+        ChainTypeComparisonDTO result = chainTypeComparisonService.compareChainTypes(
+                deviceId, inputSpeedRPM, inputTorque, scraperDepth, scraperWidth, scraperAngle);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/comparison/chain-types/meta")
+    public ResponseEntity<List<Map<String, Object>>> getChainTypeMeta() {
+        return ResponseEntity.ok(chainTypeComparisonService.getAllChainTypeMeta());
+    }
+
+    // =============  新功能2: 跨时代对比  =============
+
+    @PostMapping("/comparison/eras/{deviceId}")
+    public ResponseEntity<EraComparisonDTO> compareEras(
+            @PathVariable Integer deviceId,
+            @RequestParam(required = false) Double chainSpeedRatio,
+            @RequestParam(required = false) Double scraperSizeScale) {
+        log.info("执行跨时代对比: deviceId={}", deviceId);
+        EraComparisonDTO result = eraComparisonService.compareEras(
+                deviceId, chainSpeedRatio, scraperSizeScale);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/comparison/eras/meta")
+    public ResponseEntity<List<Map<String, Object>>> getEraMeta() {
+        return ResponseEntity.ok(eraComparisonService.getAllEraMeta());
+    }
+
+    // =============  新功能3: 多台并联协同优化  =============
+
+    @PostMapping("/optimization/parallel")
+    public ResponseEntity<ParallelOptimizationDTO> optimizeParallel(
+            @RequestParam List<Integer> deviceIds,
+            @RequestParam(required = false) Double targetTotalFlowLh,
+            @RequestParam(required = false) Double maxTotalPowerKW,
+            @RequestParam(required = false, defaultValue = "BALANCED") String optimizationGoal) {
+        log.info("执行多台并联协同优化: devices={}, goal={}", deviceIds, optimizationGoal);
+        ParallelOptimizationDTO result = parallelOptimizer.optimizeParallel(
+                deviceIds, targetTotalFlowLh, maxTotalPowerKW, optimizationGoal);
+        return ResponseEntity.ok(result);
+    }
+
+    // =============  新功能4: 公众虚拟操作体验  =============
+
+    @PostMapping("/virtual-operation/{deviceId}/step")
+    public ResponseEntity<VirtualOperationDTO> virtualOperationStep(
+            @PathVariable Integer deviceId,
+            @RequestParam Double chainSpeedMs,
+            @RequestParam(required = false, defaultValue = "1.0") Double waterLevelFactor,
+            @RequestParam(required = false, defaultValue = "1") Integer operationSeconds,
+            @RequestParam(required = false, defaultValue = "false") Boolean resetSession) {
+        VirtualOperationDTO result = virtualOperationService.performOperation(
+                deviceId, chainSpeedMs, waterLevelFactor, operationSeconds, resetSession);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/virtual-operation/{deviceId}/state")
+    public ResponseEntity<VirtualOperationDTO> getVirtualOperationState(@PathVariable Integer deviceId) {
+        VirtualOperationDTO result = virtualOperationService.performOperation(
+                deviceId, 1.5, 1.0, 0, false);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/virtual-operation/reset-all")
+    public ResponseEntity<Map<String, Object>> resetAllVirtualSessions() {
+        return ResponseEntity.ok(virtualOperationService.resetAllSessions());
+    }
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> healthCheck() {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "UP");
         health.put("service", "Ancient Waterwheel Chain Transmission Simulation System");
-        health.put("version", "1.0.0");
+        health.put("version", "1.1.0");
+        health.put("features", new String[]{
+                "chain-type-comparison",
+                "era-comparison",
+                "parallel-optimization",
+                "virtual-operation"
+        });
         health.put("timestamp", OffsetDateTime.now().toString());
         return ResponseEntity.ok(health);
     }

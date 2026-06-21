@@ -353,5 +353,37 @@
 <script src="js/chain_pump_3d.js"></script>
 <script src="js/efficiency_panel.js"></script>
 <script src="js/data-handler.js"></script>
+<script src="js/feature_modules.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        if (window.FeatureModules && typeof window.FeatureModules.init === 'function') {
+            const firstDeviceBtn = document.querySelector('.device-item');
+            let initId = 1;
+            if (firstDeviceBtn && firstDeviceBtn.dataset.deviceId) {
+                initId = parseInt(firstDeviceBtn.dataset.deviceId) || 1;
+            }
+            window.FeatureModules.init(initId);
+
+            if (window.EfficiencyPanel) {
+                const origSelect = window.EfficiencyPanel.selectDevice;
+                if (origSelect) {
+                    window.EfficiencyPanel.selectDevice = function(id) {
+                        const r = origSelect.call(this, id);
+                        if (window.FeatureModules) window.FeatureModules.setDevice(id);
+                        return r;
+                    };
+                }
+            }
+        }
+    } catch(e) { console.warn('Feature modules init failed:', e); }
+
+    window.addEventListener('beforeunload', function() {
+        if (window.FeatureModules && window.FeatureModules.stopAll) {
+            window.FeatureModules.stopAll();
+        }
+    });
+});
+</script>
 </body>
 </html>

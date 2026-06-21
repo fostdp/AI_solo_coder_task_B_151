@@ -104,6 +104,10 @@ const EfficiencyPanel = {
         if (this.sensorData.flow.length > 100) this.sensorData.flow.shift();
     },
 
+    addRealtimeFlowPoint: function(value) {
+        this.addWaterFlowDataPoint(value);
+    },
+
     async loadDevices() {
         try {
             const res = await fetch(API_BASE + '/devices');
