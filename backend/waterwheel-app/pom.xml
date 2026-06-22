@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.waterwheel</groupId>
+        <artifactId>chain-transmission-multi</artifactId>
+        <version>2.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>waterwheel-app</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Waterwheel App - Main Application</name>
+    <description>古代水转翻车系统 - 主应用模块（Controller、启动类、服务装配）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>core-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>core-simulation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>chain-comparator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>era-comparator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>parallel-optimizer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>vr-chain-pump</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-mqtt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.waterwheel.chaintransmission.WaterwheelChainTransmissionApplication</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>../src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>../src/test/resources</directory>
+            </testResource>
+        </testResources>
+    </build>
+</project>

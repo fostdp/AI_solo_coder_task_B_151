@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.waterwheel</groupId>
+        <artifactId>chain-transmission-multi</artifactId>
+        <version>2.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>era-comparator</artifactId>
+    <packaging>jar</packaging>
+    <name>era-comparator</name>
+    <description>跨时代对比模块 - 包含EraComparisonService, EraType枚举</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>core-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.waterwheel</groupId>
+            <artifactId>chain-comparator</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

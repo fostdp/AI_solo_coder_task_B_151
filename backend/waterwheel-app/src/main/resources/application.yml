@@ -1,0 +1,79 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: waterwheel-chain-transmission
+
+  config:
+    import:
+      - config/dtu-receiver.yml
+      - config/chain-dynamics.yml
+      - config/efficiency-optimization.yml
+      - config/alert-thresholds.yml
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:waterwheel_simulation}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 50
+    open-in-view: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mqtt:
+  broker: tcp://${MQTT_HOST:localhost}:${MQTT_PORT:1883}
+  client-id: waterwheel-backend-${random.int}
+  username: ${MQTT_USER:admin}
+  password: ${MQTT_PASSWORD:admin}
+  topic:
+    alert: waterwheel/alert
+    sensor: waterwheel/sensor
+  qos: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 10s
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.waterwheel.chaintransmission: ${LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: WARN

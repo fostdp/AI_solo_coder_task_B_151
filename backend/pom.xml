@@ -5,12 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.waterwheel</groupId>
-    <artifactId>chain-transmission-simulation</artifactId>
-    <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <artifactId>chain-transmission-multi</artifactId>
+    <version>2.0.0</version>
+    <packaging>pom</packaging>
 
-    <name>Ancient Waterwheel Chain Transmission Simulation</name>
-    <description>古代水转翻车链传动动力学仿真与提水效率优化系统</description>
+    <name>Ancient Waterwheel Multi-Module Parent</name>
+    <description>古代水转翻车系统 - 多模块父POM</description>
+
+    <modules>
+        <module>core-common</module>
+        <module>core-simulation</module>
+        <module>chain-comparator</module>
+        <module>era-comparator</module>
+        <module>parallel-optimizer</module>
+        <module>vr-chain-pump</module>
+        <module>waterwheel-app</module>
+    </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -24,73 +34,60 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <waterwheel.version>2.0.0</waterwheel.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>core-common</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>core-simulation</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>chain-comparator</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>era-comparator</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>parallel-optimizer</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.waterwheel</groupId>
+                <artifactId>vr-chain-pump</artifactId>
+                <version>${waterwheel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.paho</groupId>
+                <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+                <version>1.2.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-mqtt</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.2.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -99,19 +96,18 @@
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.11</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
