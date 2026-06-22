@@ -26,6 +26,7 @@ public class VirtualOperationService {
     private static final double MIN_SPEED = 0.3;
     private static final double MAX_SPEED = 4.0;
     private static final int TENSION_SAMPLES = 50;
+    private static final double SENSITIVITY_GAMMA = 0.7;
 
     public VirtualOperationDTO performOperation(Integer deviceId,
                                                  Double chainSpeedMs,
@@ -43,6 +44,8 @@ public class VirtualOperationService {
         speed = clamp(speed, MIN_SPEED, MAX_SPEED);
         wlFactor = clamp(wlFactor, 0.3, 1.3);
 
+        double effectiveSpeed = applySensitivityCurve(speed);
+
         OperationSession session;
         if (reset || !sessions.containsKey(deviceId)) {
             session = new OperationSession();
@@ -53,28 +56,29 @@ public class VirtualOperationService {
         session.accumulatedSeconds += seconds;
 
         double sprocketRadiusM = device.getSprocketRadiusCmDouble() / 100.0;
-        double rpm = (speed * 60.0) / (2 * Math.PI * sprocketRadiusM);
+        double rpm = (effectiveSpeed * 60.0) / (2 * Math.PI * sprocketRadiusM);
 
         double depth = 0.12 * wlFactor;
         double width = 0.25;
         double angle = 40.0;
 
-        double flowLh = efficiencyOptimizer.calculateWaterFlow(depth, width, angle, speed);
+        int scraperCount = device.getScraperCountInt();
+        double flowLh = efficiencyOptimizer.calculateWaterFlow(depth, width, angle, effectiveSpeed, scraperCount, sprocketRadiusM);
         double instantaneousLs = flowLh / 3600.0;
 
-        double nominalFlowLh = 25000.0;
         double nominalTension = 3500.0;
+        double speedRatio = effectiveSpeed / 1.75;
         double tension = nominalTension
-                * (speed / 1.75)
+                * speedRatio
                 * (1.0 + (depth / 0.15 - 1.0) * 0.3);
         tension += gaussian(0, tension * 0.05);
 
         double scraperLoad = 400.0
                 * wlFactor
-                * (1.0 + (speed / 1.75 - 1.0) * 0.4)
+                * (1.0 + (speedRatio - 1.0) * 0.4)
                 + gaussian(0, 15);
 
-        double angularVelocity = speed / sprocketRadiusM;
+        double angularVelocity = effectiveSpeed / sprocketRadiusM;
         double torque = (tension * sprocketRadiusM * 0.6) + 15.0;
         double power = torque * angularVelocity;
 
@@ -82,9 +86,9 @@ public class VirtualOperationService {
         double efficiency = power > 0 ? (waterEnergy / power) * 100.0 : 0;
         efficiency = clamp(efficiency, 0, 95);
 
-        double vibrationBase = 0.3 + (speed / MAX_SPEED) * 1.5;
+        double vibrationBase = 0.3 + (effectiveSpeed / MAX_SPEED) * 1.5;
         double amplitude = vibrationBase
-                * (1.0 + (Math.abs(speed - 2.1) < 0.3 ? 0.8 : 0))
+                * (1.0 + (Math.abs(effectiveSpeed - 2.1) < 0.3 ? 0.8 : 0))
                 * (1.0 + (tension / 6000 - 1.0) * 0.3);
 
         List<BigDecimal> tensionDist = new ArrayList<>();
@@ -98,7 +102,7 @@ public class VirtualOperationService {
             tensionDist.add(round(ti));
         }
 
-        List<Float> linkPositions = computeChainLinkPositionsFast(device, speed, session);
+        List<Float> linkPositions = computeChainLinkPositionsFast(device, effectiveSpeed, session);
 
         List<String> warnings = new ArrayList<>();
         String status = "NORMAL";
@@ -113,10 +117,10 @@ public class VirtualOperationService {
             warnings.add("检测到异常振动，疑似接近共振区间，调整链速");
             if ("NORMAL".equals(status)) status = "WARNING";
         }
-        if (speed < 0.5 && wlFactor > 0.6) {
+        if (effectiveSpeed < 0.5 && wlFactor > 0.6) {
             warnings.add("转速过低，刮板填充效率下降");
         }
-        if (speed > 3.0) {
+        if (effectiveSpeed > 3.0) {
             warnings.add("高速运行，离心损失和磨损显著增加");
         }
 
@@ -143,10 +147,25 @@ public class VirtualOperationService {
         dto.setChainLinkPositions(linkPositions);
         dto.setOperationStatus(status);
         dto.setWarnings(warnings);
+
+        Map<String, Object> sensitivityInfo = new LinkedHashMap<>();
+        sensitivityInfo.put("inputSpeedMs", speed);
+        sensitivityInfo.put("effectiveSpeedMs", round(effectiveSpeed));
+        sensitivityInfo.put("sensitivityGamma", SENSITIVITY_GAMMA);
+        sensitivityInfo.put("speedGainPercent", round((effectiveSpeed / speed - 1.0) * 100.0));
+        dto.setSensitivityInfo(sensitivityInfo);
+
         return dto;
     }
 
-    private List<Float> computeChainLinkPositionsFast(WaterwheelDevice d, double speed, OperationSession session) {
+    double applySensitivityCurve(double speed) {
+        double normalized = (speed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED);
+        normalized = clamp(normalized, 0, 1);
+        double curved = Math.pow(normalized, SENSITIVITY_GAMMA);
+        return MIN_SPEED + curved * (MAX_SPEED - MIN_SPEED);
+    }
+
+    private List<Float> computeChainLinkPositionsFast(WaterwheelDevice d, double effectiveSpeed, OperationSession session) {
         int linkCount = 120;
         double radius = d.getSprocketRadiusCmDouble() / 100.0;
         double centerDist = d.getChainLengthCmDouble() / 100.0 / 2.0;
@@ -154,7 +173,7 @@ public class VirtualOperationService {
         double totalLen = circumference + 2 * centerDist;
         double linkLen = totalLen / linkCount;
 
-        session.phase += (speed * 0.033) / linkLen;
+        session.phase += (effectiveSpeed * 0.033) / linkLen;
         session.phase = session.phase % 1.0;
 
         List<Float> positions = new ArrayList<>();

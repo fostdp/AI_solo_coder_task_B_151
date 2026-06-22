@@ -25,6 +25,7 @@ public class ParallelOptimizationDTO {
 
     private List<DeviceAssignment> assignments;
     private List<OptimizationTracePoint> trace;
+    private Map<String, Object> couplingInfo;
 
     @Data
     public static class DeviceAssignment {

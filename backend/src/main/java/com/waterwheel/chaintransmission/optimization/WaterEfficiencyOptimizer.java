@@ -565,7 +565,7 @@ public class WaterEfficiencyOptimizer {
         equation.put("depth2", round(coeffs[5], 6));
         equation.put("width2", round(coeffs[6], 6));
         equation.put("angle2", round(coeffs[7], 6));
-        equation.put("speed2", round(coeffs[8], 6)));
+        equation.put("speed2", round(coeffs[8], 6));
         equation.put("depth_width", round(coeffs[9], 6));
         equation.put("depth_angle", round(coeffs[10], 6));
         equation.put("depth_speed", round(coeffs[11], 6));

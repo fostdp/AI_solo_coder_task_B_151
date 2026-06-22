@@ -3,6 +3,7 @@ package com.waterwheel.chaintransmission.dto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class VirtualOperationDTO {
@@ -29,4 +30,5 @@ public class VirtualOperationDTO {
     private List<Float> chainLinkPositions;
     private String operationStatus;
     private List<String> warnings;
+    private Map<String, Object> sensitivityInfo;
 }

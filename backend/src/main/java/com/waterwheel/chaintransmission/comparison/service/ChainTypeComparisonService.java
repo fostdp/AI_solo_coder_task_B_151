@@ -67,12 +67,13 @@ public class ChainTypeComparisonService {
         result.setChainTypeName(ct.getDisplayName());
         result.setDescription(ct.getDescription());
         result.setTransmissionEfficiency(round(ct.getTransmissionEfficiency()));
-        result.setMaxAllowableSpeed(round(ct.getMaxSpeed()));
+        result.setMaxAllowableSpeed(round(ct.getMaxSpeedMs()));
 
         double sprocketRadiusM = device.getSprocketRadiusCmDouble() / 100.0;
         double chainSpeedMs = (2 * Math.PI * sprocketRadiusM * speedRPM) / 60.0;
 
-        double baseFlow = optimizer.calculateWaterFlow(depth, width, angle, chainSpeedMs);
+        int scraperCount = device.getScraperCountInt();
+        double baseFlow = optimizer.calculateWaterFlow(depth, width, angle, chainSpeedMs, scraperCount, sprocketRadiusM);
         double adjustedFlow = baseFlow
                 * ct.getTransmissionEfficiency()
                 * ct.getWaterRetentionRate();
@@ -89,7 +90,7 @@ public class ChainTypeComparisonService {
         double nominalTension = (torque / sprocketRadiusM) * ct.getTensionCoefficient();
         result.setChainTensionN(round(nominalTension));
 
-        double speedRatio = chainSpeedMs / ct.getMaxSpeed();
+        double speedRatio = chainSpeedMs / ct.getMaxSpeedMs();
         double wearBase = ct.getWearCoefficient() * Math.pow(speedRatio, 1.5) * 1e-6;
         result.setWearRate(round(wearBase * 1000000));
 
@@ -144,7 +145,9 @@ public class ChainTypeComparisonService {
             m.put("tensionCoefficient", ct.getTensionCoefficient());
             m.put("waterRetentionRate", ct.getWaterRetentionRate());
             m.put("wearCoefficient", ct.getWearCoefficient());
-            m.put("maxSpeed_rpm", ct.getMaxSpeed());
+            m.put("maxSpeed_rpm", ct.getMaxSpeedRPM());
+            m.put("maxSpeed_ms", ct.getMaxSpeedMs());
+            m.put("measurementSource", ct.getMeasurementSource());
             list.add(m);
         }
         return list;

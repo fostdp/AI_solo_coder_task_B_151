@@ -84,7 +84,8 @@ public class EraComparisonService {
             baseWidth = Math.min(baseWidth, 0.30);
             angle = 35.0;
         }
-        double baseFlow = optimizer.calculateWaterFlow(baseDepth, baseWidth, angle, chainSpeedMs);
+        double baseFlow = optimizer.calculateWaterFlow(baseDepth, baseWidth, angle, chainSpeedMs,
+                device.getScraperCountInt(), device.getSprocketRadiusCmDouble() / 100.0);
         double adjustedFlow = baseFlow * era.getTotalEfficiency();
         r.setWaterFlowLh(round(adjustedFlow));
 
@@ -117,9 +118,9 @@ public class EraComparisonService {
             r.setLifespanYears(round(8.0));
             r.setCostFactor(round(1.0));
         } else {
-            r.setNoiseLevelDB(round(82.0));
-            r.setMaintenanceHoursPerYear(round(40.0));
-            r.setLifespanYears(round(15.0));
+            r.setNoiseLevelDB(round(70.0));
+            r.setMaintenanceHoursPerYear(round(20.0));
+            r.setLifespanYears(round(20.0));
             r.setCostFactor(round(3.5));
         }
 
@@ -134,6 +135,7 @@ public class EraComparisonService {
             ctx.put("constructionCostRatio", 1.0);
             ctx.put("laborIntensity", "高（需2-3人值守）");
             ctx.put("typicalIrrigatedArea_mu", 50);
+            ctx.put("measurementSource", era.getStandardCompliance());
         } else {
             ctx.put("era", "21世纪工业");
             ctx.put("technology", "变频电机+合金钢+PLC自动控制");
@@ -143,7 +145,9 @@ public class EraComparisonService {
             ctx.put("laborIntensity", "低（无人值守）");
             ctx.put("typicalIrrigatedArea_mu", 500);
             ctx.put("controlSystem", "PLC+HMI+远程监控");
-            ctx.put("standardCompliance", "GB/T 13006-2013离心泵、混流泵、轴流泵和旋涡泵汽蚀余量");
+            ctx.put("standardCompliance", era.getStandardCompliance());
+            ctx.put("efficiencyStandard", "GB/T 3216-2016回转动力泵水力性能验收试验");
+            ctx.put("energyEfficiencyStandard", "GB 19761-2020通风机系统节能改造及GB 18613-2020电动机能效限定值");
         }
         r.setHistoricalContext(ctx);
 
@@ -218,6 +222,7 @@ public class EraComparisonService {
             m.put("totalEfficiency", e.getTotalEfficiency());
             m.put("typicalSpeedRPM", e.getTypicalSpeedRPM());
             m.put("typicalPowerKW", e.getTypicalPowerKW());
+            m.put("standardCompliance", e.getStandardCompliance());
             list.add(m);
         }
         return list;
