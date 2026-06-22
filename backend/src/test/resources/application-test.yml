@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: waterwheel-test
+  datasource:
+    url: jdbc:h2:mem:waterwheel_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+logging:
+  level:
+    root: WARN
+    com.waterwheel.chaintransmission: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
